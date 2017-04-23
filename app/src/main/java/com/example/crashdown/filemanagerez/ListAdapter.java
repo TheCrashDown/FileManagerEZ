@@ -1,6 +1,7 @@
 package com.example.crashdown.filemanagerez;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,12 +21,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
     Context context;
     List<FileObject> arrayList;
     File currentdir;
+    List<String> selected;
 
-    public ListAdapter(Context context, List<FileObject> arrayList, File currentDir)
+    public ListAdapter(Context context, List<FileObject> arrayList, File currentDir, List<String> selected)
     {
         this.context = context;
         this.arrayList = arrayList;
         this.currentdir = currentDir;
+        this.selected = selected;
     }
 
 
@@ -40,8 +43,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
     public void onBindViewHolder(ListAdapter.MyViewHolder holder, int position)
     {
         String string = arrayList.get(position).getName();
+        if(selected.contains(arrayList.get(position).getName()))
+        {
+            string = "o_0 " + string;
+        }
+        if (selected.contains(arrayList.get(position).getName())) Log.d("EPTAhui2.2","true"); else Log.d("EPTAhui2.2","false");
         holder.textView.setText(string);
-
 
 
         if(string.equals("../turn_back/.."))
@@ -57,12 +64,17 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
             holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.folder_image));
         }
         else holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.document_image));
+
+
+
     }
 
     @Override
     public int getItemCount() {
         return arrayList.size();
     }
+
+
     public class MyViewHolder extends RecyclerView.ViewHolder
     {
         ImageView imageView;

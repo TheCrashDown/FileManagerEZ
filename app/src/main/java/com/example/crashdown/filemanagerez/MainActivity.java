@@ -1,14 +1,11 @@
 package com.example.crashdown.filemanagerez;
 
-import android.content.Context;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -21,14 +18,19 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView2;
 
-    public File currentDir;
-    File currentDir1;
-    File[] files;
-    File[] files1;
-    List<FileObject> strings = new ArrayList<FileObject>();
-    List<FileObject> strings1 = new ArrayList<FileObject>();
-    boolean InMainDirectory = false;
-    boolean InMainDirectory2 = false;
+    private File currentDir;
+    private File currentDir1;
+    private File[] files;
+    private File[] files1;
+    private List<FileObject> strings = new ArrayList<FileObject>();
+    private List<FileObject> strings1 = new ArrayList<FileObject>();
+    private boolean InMainDirectory = false;
+    private boolean InMainDirectory2 = false;
+
+    private boolean inSelectMode = false;
+    private boolean inSelectMode2 = false;
+    private List<String> selected = new ArrayList<String>();
+    private List<String> selected2 = new ArrayList<String>();
 
 
     @Override
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         recyclerView = (RecyclerView) findViewById(R.id.list1);
-        final ListAdapter listAdapter = new ListAdapter(this, strings, currentDir);
+        final ListAdapter listAdapter = new ListAdapter(this, strings, currentDir, selected);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(listAdapter);
@@ -81,71 +83,84 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
-                    public void onItemClick(View view, int position)
-                    {
-                        if(strings.get(position).getName() == "../turn_back/..")
+                    public void onItemClick(View view, int position) {
+                        Log.d("EPTAhui", "click------------------");
+                        if(!inSelectMode)
                         {
-                            MoverArgument result = MoveToParent(strings, currentDir);
-                            strings = result.getStrings();
-                            currentDir = result.getCurrentDir();
-                            listAdapter.notifyDataSetChanged();
-                        }
-                        else if((strings.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard") && !InMainDirectory) || (strings.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard2") && !InMainDirectory))
-                        {
-                            for(int i = 0; i < strings.size();) strings.remove(0);
-                            strings.add(new FileObject(new File("/mnt/sdcard")));
-                            strings.add(new FileObject(new File("/mnt/sdcard2")));
-                            InMainDirectory = true;
-                            listAdapter.notifyDataSetChanged();
-                        }
+                            if (strings.get(position).getName() == "../turn_back/..")
+                            {
+                                MoverArgument result = MoveToParent(strings, currentDir);
+                                strings = result.getStrings();
+                                currentDir = result.getCurrentDir();
+                                listAdapter.notifyDataSetChanged();
+                            } else if ((strings.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard") && !InMainDirectory) || (strings.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard2") && !InMainDirectory)) {
+                                for (int i = 0; i < strings.size(); ) strings.remove(0);
+                                  strings.add(new FileObject(new File("/mnt/sdcard")));
+                                strings.add(new FileObject(new File("/mnt/sdcard2")));
+                                InMainDirectory = true;
+                                listAdapter.notifyDataSetChanged();
+                            } else if (InMainDirectory) {
+                                if (position == 0) {
+                                    currentDir = new File("/mnt/sdcard");
+                                    for (int i = 0; i < strings.size(); ) strings.remove(0);
+                                    strings.add(new FileObject(currentDir));
+                                    if (currentDir.isDirectory()) {
+                                        files = currentDir.listFiles();
+                                        for (int i = 0; i < files.length; i++) {
+                                            strings.add(new FileObject(files[i]));
+                                        }
+                                    }
+                                }
+                                if (position == 1) {
+                                    currentDir = new File("/mnt/sdcard2");
+                                    for (int i = 0; i < strings.size(); ) strings.remove(0);
+                                    strings.add(new FileObject(currentDir));
+                                    if (currentDir.isDirectory()) {
+                                        files = currentDir.listFiles();
+                                        for (int i = 0; i < files.length; i++) {
+                                            strings.add(new FileObject(files[i]));
+                                        }
+                                    }
+                                }
+                                InMainDirectory = false;
+                                listAdapter.notifyDataSetChanged();
+                            } else {
+                                MoverArgument result = MoveToChild(strings, currentDir, position);
+                                strings = result.getStrings();
+                                currentDir = result.getCurrentDir();
+                                listAdapter.notifyDataSetChanged();
+                            }
 
-                        else if(InMainDirectory)
-                        {
-                            if(position == 0)
-                            {
-                                currentDir = new File("/mnt/sdcard");
-                                for(int i = 0; i < strings.size();) strings.remove(0);
-                                strings.add(new FileObject(currentDir));
-                                if (currentDir.isDirectory())
-                                {
-                                    files = currentDir.listFiles();
-                                    for (int i = 0; i < files.length; i++)
-                                    {
-                                        strings.add(new FileObject(files[i]));
-                                    }
-                                }
-                            }
-                            if(position == 1)
-                            {
-                                currentDir = new File("/mnt/sdcard2");
-                                for(int i = 0; i < strings.size();) strings.remove(0);
-                                strings.add(new FileObject(currentDir));
-                                if (currentDir.isDirectory())
-                                {
-                                    files = currentDir.listFiles();
-                                    for (int i = 0; i < files.length; i++)
-                                    {
-                                        strings.add(new FileObject(files[i]));
-                                    }
-                                }
-                            }
-                            InMainDirectory = false;
-                            listAdapter.notifyDataSetChanged();
-                        }
-                        else
-                        {
-                            MoverArgument result = MoveToChild(strings, currentDir, position);
-                            strings = result.getStrings();
-                            currentDir = result.getCurrentDir();
-                            listAdapter.notifyDataSetChanged();
-                        }
                     }
+                    else
+                        {
+                            if(!selected.contains(strings.get(position).getName())) selected.add(strings.get(position).getName());
+                            else selected.remove(strings.get(position).getName());
+                            Log.d("EPTAhui", strings.get(position).getName());
+                            listAdapter.notifyDataSetChanged();
+                        }
+                }
 
                     @Override
                     public void onItemLongClick(View view, int position)
                     {
+                        Log.d("EPTAhui", "longlonglongclick------------------");
                         Toast.makeText(getApplicationContext(),strings.get(position).getName(), Toast.LENGTH_SHORT).show();
+                        if(!inSelectMode)
+                        {
+                            inSelectMode = !inSelectMode;
+                            selected.add(strings.get(position).getName());
+                        }
+                        else
+                        {
+                            inSelectMode = !inSelectMode;
+                            while(selected.size() > 0) selected.remove(0);
+                        }
+
+                        listAdapter.notifyDataSetChanged();
+
                     }
+
                 })
         );
 
