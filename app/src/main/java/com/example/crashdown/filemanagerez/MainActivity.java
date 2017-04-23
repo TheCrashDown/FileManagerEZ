@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         recyclerView.addOnItemTouchListener(
-                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
+                new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position)
                     {
@@ -140,6 +140,12 @@ public class MainActivity extends AppCompatActivity {
                             listAdapter.notifyDataSetChanged();
                         }
                     }
+
+                    @Override
+                    public void onItemLongClick(View view, int position)
+                    {
+                        Toast.makeText(getApplicationContext(),strings.get(position).getName(), Toast.LENGTH_SHORT).show();
+                    }
                 })
         );
 
@@ -147,7 +153,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         recyclerView2.addOnItemTouchListener(
-                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
+                new RecyclerItemClickListener(this, recyclerView2, new RecyclerItemClickListener.OnItemClickListener() {
+
+
                     @Override
                     public void onItemClick(View view, int position)
                     {
@@ -206,6 +214,12 @@ public class MainActivity extends AppCompatActivity {
                             currentDir1 = result.getCurrentDir();
                             listAdapter2.notifyDataSetChanged();
                         }
+                    }
+
+                    @Override
+                    public void onItemLongClick(View view, int position)
+                    {
+                        Toast.makeText(getApplicationContext(),strings1.get(position).getName(), Toast.LENGTH_SHORT).show();
                     }
                 })
         );
