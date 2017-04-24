@@ -3,11 +3,13 @@ package com.example.crashdown.filemanagerez;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,8 +47,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         String string = arrayList.get(position).getName();
         if(selected.contains(arrayList.get(position).getName()))
         {
-            string = "o_0 " + string;
+            //string = "o_0 " + string;
+            holder.cardView.setCardBackgroundColor(Color.parseColor("#bed2dc"));
+
         }
+        else holder.cardView.setCardBackgroundColor(Color.WHITE);
         if (selected.contains(arrayList.get(position).getName())) Log.d("EPTAhui2.2","true"); else Log.d("EPTAhui2.2","false");
         holder.textView.setText(string);
 
@@ -80,12 +85,16 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         ImageView imageView;
         TextView textView;
         LinearLayout linearLayout;
+        CardView cardView;
+
 
         public MyViewHolder(View itemview) {
             super(itemview);
+
             linearLayout = (LinearLayout) itemview.findViewById(R.id.list_item1);
             imageView = (ImageView) itemview.findViewById(R.id.list_item1_image);
             textView = (TextView) itemview.findViewById(R.id.list_item1_textView);
+            cardView = (CardView) itemview.findViewById(R.id.list1_card);
 
         }
 

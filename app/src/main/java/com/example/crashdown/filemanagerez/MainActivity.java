@@ -1,7 +1,9 @@
 package com.example.crashdown.filemanagerez;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -64,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
                 strings1.add(new FileObject(files1[i]));
             }
         }
+
+
+
 
 
         recyclerView = (RecyclerView) findViewById(R.id.list1);
