@@ -45,13 +45,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
     public void onBindViewHolder(ListAdapter.MyViewHolder holder, int position)
     {
         String string = arrayList.get(position).getName();
+        int color = Color.WHITE;
         if(selected.contains(arrayList.get(position).getName()))
         {
-            //string = "o_0 " + string;
-            holder.cardView.setCardBackgroundColor(Color.parseColor("#bed2dc"));
-
+            color = Color.parseColor("#bed2dc");
         }
-        else holder.cardView.setCardBackgroundColor(Color.WHITE);
+        holder.itemView.setBackgroundColor(color);
         if (selected.contains(arrayList.get(position).getName())) Log.d("EPTAhui2.2","true"); else Log.d("EPTAhui2.2","false");
         holder.textView.setText(string);
 
@@ -85,7 +84,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         ImageView imageView;
         TextView textView;
         LinearLayout linearLayout;
-        CardView cardView;
+
 
 
         public MyViewHolder(View itemview) {
@@ -94,7 +93,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
             linearLayout = (LinearLayout) itemview.findViewById(R.id.list_item1);
             imageView = (ImageView) itemview.findViewById(R.id.list_item1_image);
             textView = (TextView) itemview.findViewById(R.id.list_item1_textView);
-            cardView = (CardView) itemview.findViewById(R.id.list1_card);
+
 
         }
 

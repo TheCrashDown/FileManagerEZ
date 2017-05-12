@@ -11,9 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#ffffff"
         android:clipToPadding="false"
-        android:padding="8dp">
+        android:padding="1dp">
     </android.support.v7.widget.RecyclerView>
 
     <android.support.v7.widget.RecyclerView
@@ -22,8 +21,7 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:layout_weight="1"
-        android:background="#ffffff"
-        android:padding="8dp">
+        android:padding="1dp">
     </android.support.v7.widget.RecyclerView>
 
 
