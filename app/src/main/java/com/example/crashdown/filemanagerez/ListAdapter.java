@@ -48,14 +48,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         String string = arrayList.get(position).getName();
         int color = Color.WHITE;
         //if(selected.size()==0) holder.checkbox.setMaxWidth(0);
-        if(selected.contains(arrayList.get(position).getName()))
+        if(position!=0 && selected.contains(arrayList.get(position).getName()))
         {
             color = Color.parseColor("#bed2dc");
             holder.checkbox.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.item_checked));
         }
         //holder.checkbox.r
-        else if(selected.size()!=0) holder.checkbox.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.item_unchecked));
-        if(selected.size()==0) holder.checkbox.setVisibility(View.GONE); else holder.checkbox.setVisibility(View.VISIBLE);
+        else if(selected.size()!=0 && position!=0) holder.checkbox.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.item_unchecked));
+        if(selected.size()==0 || position == 0) holder.checkbox.setVisibility(View.GONE); else holder.checkbox.setVisibility(View.VISIBLE);
         holder.itemView.setBackgroundColor(color);
         if (selected.contains(arrayList.get(position).getName())) Log.d("EPTAhui2.2","true"); else Log.d("EPTAhui2.2","false");
         holder.textView.setText(string);
@@ -67,7 +67,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         {
             holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.turnback_image));
         }
-        else if(arrayList.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard") || arrayList.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard2"))
+        else if(arrayList.get(position).getFile().getAbsolutePath().equals(MainActivity.STORAGE_LOCATION.getFile().getAbsolutePath()) ||
+                arrayList.get(position).getFile().getAbsolutePath().equals(MainActivity.SDCARD_LOCATION.getFile().getAbsolutePath()))
         {
             holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.ic_launcher));
         }

@@ -1,6 +1,7 @@
 package com.example.crashdown.filemanagerez;
 
 import android.graphics.Color;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -34,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private List<String> selected = new ArrayList<String>();
     private List<String> selected1 = new ArrayList<String>();
 
+    public static FileObject STORAGE_LOCATION;
+    public static FileObject SDCARD_LOCATION;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +45,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+        STORAGE_LOCATION = new FileObject(Environment.getExternalStorageDirectory(),"Storage");
+        SDCARD_LOCATION = new FileObject(new File(System.getenv("SECONDARY_STORAGE")),"SD-Card");
 
-
-        currentDir = new File("/mnt/sdcard");
-        strings.add(new FileObject(currentDir));
+        currentDir = STORAGE_LOCATION.getFile();
+        strings.add(STORAGE_LOCATION);
         if (currentDir.isDirectory())
         {
             files = currentDir.listFiles();
@@ -57,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        currentDir1 = new File("/mnt/sdcard2");
-        strings1.add(new FileObject(currentDir1));
+        currentDir1 = SDCARD_LOCATION.getFile();
+        strings1.add (SDCARD_LOCATION);
         if (currentDir1.isDirectory())
         {
             files1 = currentDir1.listFiles();
@@ -100,17 +105,18 @@ public class MainActivity extends AppCompatActivity {
                                 strings = result.getStrings();
                                 currentDir = result.getCurrentDir();
                                 listAdapter.notifyDataSetChanged();
-                            } else if ((strings.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard") && !InMainDirectory) || (strings.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard2") && !InMainDirectory)) {
+                            } else if ((strings.get(position).getFile().getAbsolutePath().equals(STORAGE_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory) ||
+                                    (strings.get(position).getFile().getAbsolutePath().equals(SDCARD_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory)) {
                                 for (int i = 0; i < strings.size(); ) strings.remove(0);
-                                  strings.add(new FileObject(new File("/mnt/sdcard")));
-                                strings.add(new FileObject(new File("/mnt/sdcard2")));
+                                strings.add(STORAGE_LOCATION);
+                                strings.add(SDCARD_LOCATION);
                                 InMainDirectory = true;
                                 listAdapter.notifyDataSetChanged();
                             } else if (InMainDirectory) {
                                 if (position == 0) {
-                                    currentDir = new File("/mnt/sdcard");
+                                    currentDir = STORAGE_LOCATION.getFile();
                                     for (int i = 0; i < strings.size(); ) strings.remove(0);
-                                    strings.add(new FileObject(currentDir));
+                                    strings.add(STORAGE_LOCATION);
                                     if (currentDir.isDirectory()) {
                                         files = currentDir.listFiles();
                                         for (int i = 0; i < files.length; i++) {
@@ -118,10 +124,11 @@ public class MainActivity extends AppCompatActivity {
                                         }
                                     }
                                 }
-                                if (position == 1) {
-                                    currentDir = new File("/mnt/sdcard2");
+                                if (position == 1)
+                                {
+                                    currentDir = SDCARD_LOCATION.getFile();
                                     for (int i = 0; i < strings.size(); ) strings.remove(0);
-                                    strings.add(new FileObject(currentDir));
+                                    strings.add(SDCARD_LOCATION);
                                     if (currentDir.isDirectory()) {
                                         files = currentDir.listFiles();
                                         for (int i = 0; i < files.length; i++) {
@@ -139,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                     }
-                    else
+                    else if (position != 0)
                         {
                             if(!selected.contains(strings.get(position).getName())) selected.add(strings.get(position).getName());
                             else selected.remove(strings.get(position).getName());
@@ -153,14 +160,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onItemLongClick(View view, int position)
                     {
+
                         Log.d("EPTAhui", "longlonglongclick------------------");
                         Toast.makeText(getApplicationContext(),strings.get(position).getName(), Toast.LENGTH_SHORT).show();
-                        if(!inSelectMode)
+                        if(!inSelectMode && position!=0)
                         {
                             inSelectMode = !inSelectMode;
                             selected.add(strings.get(position).getName());
                         }
-                        else
+                        else if(inSelectMode)
                         {
                             inSelectMode = !inSelectMode;
                             while(selected.size() > 0) selected.remove(0);
@@ -190,18 +198,19 @@ public class MainActivity extends AppCompatActivity {
                                 strings1 = result.getStrings();
                                 currentDir1 = result.getCurrentDir();
                                 listAdapter2.notifyDataSetChanged();
-                            } else if ((strings1.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard") && !InMainDirectory2) || (strings1.get(position).getFile().getAbsolutePath().equals("/mnt/sdcard2") && !InMainDirectory2)) {
+                            } else if ((strings1.get(position).getFile().getAbsolutePath().equals(STORAGE_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory2) ||
+                                    (strings1.get(position).getFile().getAbsolutePath().equals(SDCARD_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory2)) {
                                 for (int i = 0; i < strings1.size(); ) strings1.remove(0);
-                                strings1.add(new FileObject(new File("/mnt/sdcard")));
-                                strings1.add(new FileObject(new File("/mnt/sdcard2")));
+                                strings1.add(STORAGE_LOCATION);
+                                strings1.add(SDCARD_LOCATION);
                                 InMainDirectory2 = true;
                                 listAdapter2.notifyDataSetChanged();
                             } else if (InMainDirectory2) {
                                 if (position == 0)
                                 {
-                                    currentDir1 = new File("/mnt/sdcard");
+                                    currentDir1 = STORAGE_LOCATION.getFile();
                                     for (int i = 0; i < strings1.size(); ) strings1.remove(0);
-                                    strings1.add(new FileObject(currentDir1));
+                                    strings1.add(STORAGE_LOCATION);
                                     if (currentDir1.isDirectory()) {
                                         files1 = currentDir1.listFiles();
                                         for (int i = 0; i < files1.length; i++) {
@@ -211,9 +220,9 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 if (position == 1)
                                 {
-                                    currentDir1 = new File("/mnt/sdcard2");
+                                    currentDir1 = SDCARD_LOCATION.getFile();
                                     for (int i = 0; i < strings1.size(); ) strings1.remove(0);
-                                    strings1.add(new FileObject(currentDir1));
+                                    strings1.add(SDCARD_LOCATION);
                                     if (currentDir1.isDirectory()) {
                                         files1 = currentDir1.listFiles();
                                         for (int i = 0; i < files1.length; i++) {
@@ -229,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                                 currentDir1 = result.getCurrentDir();
                                 listAdapter2.notifyDataSetChanged();
                             }
-                        } else
+                        } else if (position != 0)
                             {
                                 if(!selected1.contains(strings1.get(position).getName())) selected1.add(strings1.get(position).getName());
                                 else selected1.remove(strings1.get(position).getName());
@@ -247,12 +256,12 @@ public class MainActivity extends AppCompatActivity {
                     {
                         Log.d("EPTAhui", "longlonglongclick------------------");
                         Toast.makeText(getApplicationContext(),strings1.get(position).getName(), Toast.LENGTH_SHORT).show();
-                        if(!inSelectMode1)
+                        if(!inSelectMode1 && position != 0)
                         {
                             inSelectMode1 = !inSelectMode1;
                             selected1.add(strings1.get(position).getName());
                         }
-                        else
+                        else if (inSelectMode1)
                         {
                             inSelectMode1 = !inSelectMode1;
                             while(selected1.size() > 0) selected1.remove(0);
@@ -274,13 +283,13 @@ public class MainActivity extends AppCompatActivity {
             strings.remove(0);
         }
         files = currentDir.listFiles();
-        if (currentDir.getAbsolutePath().endsWith("/mnt/sdcard"))
+        if (currentDir.getAbsolutePath().equals(STORAGE_LOCATION.getFile().getAbsolutePath()))
         {
-            strings.add(new FileObject(new File("/mnt/sdcard")));
+            strings.add(STORAGE_LOCATION);
         }
-        else if (currentDir.getAbsolutePath().endsWith("/mnt/sdcard2"))
+        else if (currentDir.getAbsolutePath().equals(SDCARD_LOCATION.getFile().getAbsolutePath()))
         {
-            strings.add(new FileObject(new File("/mnt/sdcard2")));
+            strings.add(SDCARD_LOCATION);
         }
         else strings.add(new FileObject("../turn_back/.."));
         for (int i = 0; i < files.length; i++)
