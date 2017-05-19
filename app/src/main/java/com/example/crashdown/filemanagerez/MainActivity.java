@@ -10,8 +10,10 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,14 +38,14 @@ public class MainActivity extends AppCompatActivity {
 
     public static FileObject STORAGE_LOCATION;
     public static FileObject SDCARD_LOCATION;
+    public static final String TURN_BACK_BUTTON = "../turn_back/..";
 
     private static int lastRecyclerAction = 0;
+    private static long lastCloseClicked = 0;
 
 
     final ListAdapter listAdapter = new ListAdapter(this, strings, currentDir, selected);
     final ListAdapter listAdapter2 = new ListAdapter(this, strings1, currentDir1, selected1);
-
-    //private boolean SavedDataExists = false;
 
 
 
@@ -102,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView2.addItemDecoration(new MyDecorator(3));
 
 
+
+
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
@@ -110,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                         if(!inSelectMode)
                         {
                             lastRecyclerAction=1;
-                            if (strings.get(position).getName() == "../turn_back/..")
+                            if (strings.get(position).getName() == TURN_BACK_BUTTON)
                             {
                                 MoverArgument result = MoveToParent(strings, currentDir);
                                 strings = result.getStrings();
@@ -206,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                         if (!inSelectMode1)
                         {
                             lastRecyclerAction=2;
-                            if (strings1.get(position).getName() == "../turn_back/..") {
+                            if (strings1.get(position).getName() == TURN_BACK_BUTTON) {
                                 MoverArgument result = MoveToParent(strings1, currentDir1);
                                 strings1 = result.getStrings();
                                 currentDir1 = result.getCurrentDir();
@@ -298,11 +302,20 @@ public class MainActivity extends AppCompatActivity {
         if(!inSelectMode && !inSelectMode1)
         {
             if(lastRecyclerAction==0 || (lastRecyclerAction==1&&InMainDirectory) || (lastRecyclerAction==2&&InMainDirectory2))
-                Toast.makeText(getApplicationContext(),"//APP_CLOSED", Toast.LENGTH_LONG).show();
+            {
+                if(System.currentTimeMillis()-lastCloseClicked < 2000) super.onBackPressed();
+                else
+                {
+                    lastCloseClicked = System.currentTimeMillis();
+                    Toast.makeText(getApplicationContext(),"Press once more to close app", Toast.LENGTH_SHORT).show();
+                }
+
+                //Toast.makeText(getApplicationContext(),"//APP_CLOSED", Toast.LENGTH_LONG).show();
+            }
 
             else if (lastRecyclerAction==1)
             {
-                if (strings.get(0).getName() == "../turn_back/..")
+                if (strings.get(0).getName() == TURN_BACK_BUTTON)
                 {
                     MoverArgument result = MoveToParent(strings, currentDir);
                     strings = result.getStrings();
@@ -320,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (lastRecyclerAction==2)
             {
-                if (strings1.get(0).getName() == "../turn_back/..") {
+                if (strings1.get(0).getName() == TURN_BACK_BUTTON) {
                     MoverArgument result = MoveToParent(strings1, currentDir1);
                     lastRecyclerAction = 2;
                     strings1 = result.getStrings();
@@ -371,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
         {
             strings.add(SDCARD_LOCATION);
         }
-        else strings.add(new FileObject("../turn_back/.."));
+        else strings.add(new FileObject(TURN_BACK_BUTTON));
         for (int i = 0; i < files.length; i++)
         {
             strings.add(new FileObject(files[i]));
@@ -392,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
                 strings.remove(0);
             }
             files = currentDir.listFiles();
-            strings.add(new FileObject("../turn_back/.."));
+            strings.add(new FileObject(TURN_BACK_BUTTON));
             for (int i = 0; i < files.length; i++)
             {
                 strings.add(new FileObject(files[i]));
