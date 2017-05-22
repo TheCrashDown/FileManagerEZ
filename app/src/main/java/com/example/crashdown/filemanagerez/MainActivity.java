@@ -10,10 +10,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,23 +22,28 @@ public class MainActivity extends AppCompatActivity {
 
     private File currentDir;
     private File currentDir1;
+
     private File[] files;
     private File[] files1;
+
     private List<FileObject> strings = new ArrayList<FileObject>();
     private List<FileObject> strings1 = new ArrayList<FileObject>();
+
     private boolean InMainDirectory = false;
     private boolean InMainDirectory2 = false;
 
     private boolean inSelectMode = false;
     private boolean inSelectMode1 = false;
+
     private List<String> selected = new ArrayList<String>();
     private List<String> selected1 = new ArrayList<String>();
 
-    public static FileObject STORAGE_LOCATION;
-    public static FileObject SDCARD_LOCATION;
+    public static final FileObject STORAGE_LOCATION = new FileObject(Environment.getExternalStorageDirectory(), "Storage");
+    public static final FileObject SDCARD_LOCATION = new FileObject(new File(System.getenv("SECONDARY_STORAGE")), "SD-Card");
     public static final String TURN_BACK_BUTTON = "../turn_back/..";
 
     private static int lastRecyclerAction = 0;
+
     private static long lastCloseClicked = 0;
 
 
@@ -55,9 +58,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        STORAGE_LOCATION = new FileObject(Environment.getExternalStorageDirectory(), "Storage");
-        SDCARD_LOCATION = new FileObject(new File(System.getenv("SECONDARY_STORAGE")), "SD-Card");
 
         currentDir = STORAGE_LOCATION.getFile();
         strings.add(STORAGE_LOCATION);

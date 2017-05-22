@@ -45,17 +45,23 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
 
         String string = arrayList.get(position).getName();
         int color = Color.WHITE;
-        //if(selected.size()==0) holder.checkbox.setMaxWidth(0);
         if(position!=0 && selected.contains(arrayList.get(position).getName()))
         {
             color = Color.parseColor("#bed2dc");
             holder.checkbox.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.item_checked));
         }
-        //holder.checkbox.r
-        else if(selected.size()!=0 && position!=0) holder.checkbox.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.item_unchecked));
-        if(selected.size()==0 || position == 0) holder.checkbox.setVisibility(View.GONE); else holder.checkbox.setVisibility(View.VISIBLE);
+        else if(selected.size()!=0 && position!=0)
+            holder.checkbox.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.item_unchecked));
+
+        if(selected.size()==0 || position == 0) holder.checkbox.setVisibility(View.GONE);
+        else holder.checkbox.setVisibility(View.VISIBLE);
+
         holder.itemView.setBackgroundColor(color);
-        if (selected.contains(arrayList.get(position).getName())) Log.d("EPTAhui2.2","true"); else Log.d("EPTAhui2.2","false");
+
+        if (selected.contains(arrayList.get(position).getName()))
+            Log.d("EPTAhui2.2","true");
+        else Log.d("EPTAhui2.2","false");
+
         holder.textView.setText(string);
 
 
