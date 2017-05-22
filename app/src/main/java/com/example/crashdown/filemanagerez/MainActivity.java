@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -49,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
     final ListAdapter listAdapter = new ListAdapter(this, strings, currentDir, selected);
     final ListAdapter listAdapter2 = new ListAdapter(this, strings1, currentDir1, selected1);
-
-
 
 
     @Override
@@ -295,7 +295,44 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        if(inSelectMode||inSelectMode1)
+        {
+            menu.setGroupVisible(R.id.group_mode_normal, false);
+            menu.setGroupVisible(R.id.group_mode_select, true);
+        }
+        else
+        {
+            menu.setGroupVisible(R.id.group_mode_normal, true);
+            menu.setGroupVisible(R.id.group_mode_select, false);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+
+
+        switch (id)
+        {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+
+
+    }
 
     @Override
     public void onBackPressed() {
@@ -307,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
                 else
                 {
                     lastCloseClicked = System.currentTimeMillis();
-                    Toast.makeText(getApplicationContext(),"Press once more to close app", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),R.string.close_app, Toast.LENGTH_SHORT).show();
                 }
 
                 //Toast.makeText(getApplicationContext(),"//APP_CLOSED", Toast.LENGTH_LONG).show();
@@ -366,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
 
     public MoverArgument MoveToParent(List<FileObject> strings, File currentDir)
     {

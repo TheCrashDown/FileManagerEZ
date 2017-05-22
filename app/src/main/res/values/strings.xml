@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">FileManagerEZ</string>
+    <string name="action_uncheck">Uncheck</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_moveto">Move</string>
+    <string name="action_delete">Delete</string>
+    <string name="close_app">Press once more to close app</string>
+    <string name="action_properties">Properties</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_about">About</string>
+
 </resources>
