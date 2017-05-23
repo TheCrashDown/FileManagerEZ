@@ -15,12 +15,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
 
-    private RecyclerView recyclerView;
-
-    private RecyclerView recyclerView2;
-
+    private static final int NORMAL_MODE = 0;
+    private static final int SELECT_MODE = 1;
+    private static final int COPY_MODE = 2;
+    private static final int MOVETO_MODE = 3;
+    public static final FileObject STORAGE_LOCATION = new FileObject(Environment.getExternalStorageDirectory(), "Storage");
+    public static final FileObject SDCARD_LOCATION = new FileObject(new File(System.getenv("SECONDARY_STORAGE")), "SD-Card");
+    public static final String TURN_BACK_BUTTON = "../turn_back/..";
 
     private File currentDir;
     private File currentDir1;
@@ -34,23 +38,22 @@ public class MainActivity extends AppCompatActivity {
     private boolean InMainDirectory = false;
     private boolean InMainDirectory2 = false;
 
-    private boolean inSelectMode = false;
-    private boolean inSelectMode1 = false;
+    private static int currentMode = 0;
+    private static int currentMode1 = 0;
 
     private List<String> selected = new ArrayList<String>();
     private List<String> selected1 = new ArrayList<String>();
-
-    public static final FileObject STORAGE_LOCATION = new FileObject(Environment.getExternalStorageDirectory(), "Storage");
-    public static final FileObject SDCARD_LOCATION = new FileObject(new File(System.getenv("SECONDARY_STORAGE")), "SD-Card");
-    public static final String TURN_BACK_BUTTON = "../turn_back/..";
 
     private static int lastRecyclerAction = 0;
 
     private static long lastCloseClicked = 0;
 
-
+    private RecyclerView recyclerView;
+    private RecyclerView recyclerView2;
     final ListAdapter listAdapter = new ListAdapter(this, strings, currentDir, selected);
     final ListAdapter listAdapter2 = new ListAdapter(this, strings1, currentDir1, selected1);
+
+
 
 
     @Override
@@ -111,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(View view, int position) {
                         Log.d("EPTAhui", "click------------------");
-                        if(!inSelectMode)
+                        if(currentMode == NORMAL_MODE)
                         {
                             lastRecyclerAction=1;
                             if (strings.get(position).getName() == TURN_BACK_BUTTON)
@@ -162,11 +165,11 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                     }
-                    else if (position != 0 && !InMainDirectory)
+                    else if (currentMode == SELECT_MODE && position != 0 && !InMainDirectory)
                         {
                             if(!selected.contains(strings.get(position).getName())) selected.add(strings.get(position).getName());
                             else selected.remove(strings.get(position).getName());
-                            if(selected.size()==0) inSelectMode = false;
+                            if(selected.size()==0) currentMode = NORMAL_MODE;
                             Log.d("EPTAhui", "----" + strings.get(position).getName());
                             Log.d("EPTAhui", "----" + selected);
                             listAdapter.notifyDataSetChanged();
@@ -179,14 +182,14 @@ public class MainActivity extends AppCompatActivity {
                         lastRecyclerAction=1;
                         Log.d("EPTAhui", "longlonglongclick------------------");
                         Toast.makeText(getApplicationContext(),strings.get(position).getName(), Toast.LENGTH_SHORT).show();
-                        if(!inSelectMode && position!=0 && !InMainDirectory)
+                        if(currentMode == NORMAL_MODE && position!=0 && !InMainDirectory)
                         {
-                            inSelectMode = !inSelectMode;
+                            currentMode = SELECT_MODE;
                             selected.add(strings.get(position).getName());
                         }
-                        else if(inSelectMode)
+                        else if(currentMode == SELECT_MODE)
                         {
-                            inSelectMode = !inSelectMode;
+                            currentMode = NORMAL_MODE;
                             while(selected.size() > 0) selected.remove(0);
                         }
 
@@ -207,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(View view, int position)
                     {
-                        if (!inSelectMode1)
+                        if (currentMode1 == NORMAL_MODE)
                         {
                             lastRecyclerAction=2;
                             if (strings1.get(position).getName() == TURN_BACK_BUTTON) {
@@ -255,11 +258,11 @@ public class MainActivity extends AppCompatActivity {
                                 currentDir1 = result.getCurrentDir();
                                 listAdapter2.notifyDataSetChanged();
                             }
-                        } else if (position != 0 && !InMainDirectory2)
+                        } else if (currentMode1 == SELECT_MODE && position != 0 && !InMainDirectory2)
                             {
                                 if(!selected1.contains(strings1.get(position).getName())) selected1.add(strings1.get(position).getName());
                                 else selected1.remove(strings1.get(position).getName());
-                                if(selected1.size()==0) inSelectMode1 = false;
+                                if(selected1.size()==0) currentMode1 = NORMAL_MODE;
                                 Log.d("EPTAhui",  "----" + strings1.get(position).getName());
                                 Log.d("EPTAhui", "----" + selected1);
                                 listAdapter2.notifyDataSetChanged();
@@ -274,14 +277,14 @@ public class MainActivity extends AppCompatActivity {
                         lastRecyclerAction=2;
                         Log.d("EPTAhui", "longlonglongclick------------------");
                         Toast.makeText(getApplicationContext(),strings1.get(position).getName(), Toast.LENGTH_SHORT).show();
-                        if(!inSelectMode1 && position != 0 && !InMainDirectory2)
+                        if(currentMode1 == NORMAL_MODE && position != 0 && !InMainDirectory2)
                         {
-                            inSelectMode1 = !inSelectMode1;
+                            currentMode1 = SELECT_MODE;
                             selected1.add(strings1.get(position).getName());
                         }
-                        else if (inSelectMode1)
+                        else if (currentMode1 == SELECT_MODE)
                         {
-                            inSelectMode1 = !inSelectMode1;
+                            currentMode1 = NORMAL_MODE;
                             while(selected1.size() > 0) selected1.remove(0);
                         }
 
@@ -305,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-        if(inSelectMode||inSelectMode1)
+        if(currentMode!=NORMAL_MODE||currentMode1!=NORMAL_MODE)
         {
             menu.setGroupVisible(R.id.group_mode_normal, false);
             menu.setGroupVisible(R.id.group_mode_select, true);
@@ -323,20 +326,32 @@ public class MainActivity extends AppCompatActivity {
     {
         int id = item.getItemId();
 
-
         switch (id)
         {
+            case R.id.action_uncheck :
+                {
+                    if(currentMode != NORMAL_MODE) while (selected.size()!=0) selected.remove(0);
+                    if(currentMode1 != NORMAL_MODE) while (selected1.size()!=0) selected1.remove(0);
+                    currentMode = NORMAL_MODE;
+                    currentMode1 = NORMAL_MODE;
+                    listAdapter.notifyDataSetChanged();
+                    listAdapter2.notifyDataSetChanged();
+                }
+            case R.id.action_copy :
+                {
+
+                }
+
             default:
                 return super.onOptionsItemSelected(item);
         }
-
-
-
     }
+
+
 
     @Override
     public void onBackPressed() {
-        if(!inSelectMode && !inSelectMode1)
+        if(currentMode == NORMAL_MODE && currentMode1 == NORMAL_MODE)
         {
             if(lastRecyclerAction==0 || (lastRecyclerAction==1&&InMainDirectory) || (lastRecyclerAction==2&&InMainDirectory2))
             {
@@ -388,15 +403,15 @@ public class MainActivity extends AppCompatActivity {
         }
         else
         {
-            if (inSelectMode)
+            if (currentMode != NORMAL_MODE)
             {
-                inSelectMode = !inSelectMode;
+                currentMode = NORMAL_MODE;
                 while (selected.size() > 0) selected.remove(0);
                 listAdapter.notifyDataSetChanged();
             }
-            if (inSelectMode1)
+            if (currentMode1 != NORMAL_MODE)
             {
-                inSelectMode1 = !inSelectMode1;
+                currentMode1 = NORMAL_MODE;
                 while (selected1.size() > 0) selected1.remove(0);
                 listAdapter2.notifyDataSetChanged();
             }
