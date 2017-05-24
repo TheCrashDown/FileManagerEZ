@@ -1,6 +1,9 @@
 package com.example.crashdown.filemanagerez;
 
+import android.content.DialogInterface;
 import android.os.Environment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,8 +15,16 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+
 
 public class MainActivity extends AppCompatActivity
 {
@@ -41,8 +52,10 @@ public class MainActivity extends AppCompatActivity
     private static int currentMode = 0;
     private static int currentMode1 = 0;
 
-    private List<String> selected = new ArrayList<String>();
-    private List<String> selected1 = new ArrayList<String>();
+    private List<FileObject> selected = new ArrayList<FileObject>();
+    private List<FileObject> selected1 = new ArrayList<FileObject>();
+    private List<FileObject> selectedForCopy = new ArrayList<>();
+    private List<FileObject> selectedForCopy1 = new ArrayList<>();
 
     private static int lastRecyclerAction = 0;
 
@@ -60,6 +73,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
 
 
         currentDir = STORAGE_LOCATION.getFile();
@@ -167,8 +182,8 @@ public class MainActivity extends AppCompatActivity
                     }
                     else if (currentMode == SELECT_MODE && position != 0 && !InMainDirectory)
                         {
-                            if(!selected.contains(strings.get(position).getName())) selected.add(strings.get(position).getName());
-                            else selected.remove(strings.get(position).getName());
+                            if(!selected.contains(strings.get(position))) selected.add(strings.get(position));
+                            else selected.remove(strings.get(position));
                             if(selected.size()==0) currentMode = NORMAL_MODE;
                             Log.d("EPTAhui", "----" + strings.get(position).getName());
                             Log.d("EPTAhui", "----" + selected);
@@ -177,23 +192,34 @@ public class MainActivity extends AppCompatActivity
                 }
 
                     @Override
-                    public void onItemLongClick(View view, int position)
+                    public void onItemLongClick(View view, final int position)
                     {
                         lastRecyclerAction=1;
                         Log.d("EPTAhui", "longlonglongclick------------------");
-                        Toast.makeText(getApplicationContext(),strings.get(position).getName(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),strings.get(position).getName(), Toast.LENGTH_SHORT).show();
                         if(currentMode == NORMAL_MODE && position!=0 && !InMainDirectory)
                         {
                             currentMode = SELECT_MODE;
-                            selected.add(strings.get(position).getName());
+                            selected.add(strings.get(position));
                         }
                         else if(currentMode == SELECT_MODE)
                         {
                             currentMode = NORMAL_MODE;
                             while(selected.size() > 0) selected.remove(0);
                         }
+                        else if(currentMode == COPY_MODE || currentMode1 == COPY_MODE)
+                        {
+                            CopyDialog(strings.get(position));
+                            if(selectedForCopy.size()==0 && selectedForCopy1.size()==0)
+                            {
+                                currentMode = NORMAL_MODE;
+                                currentMode1 = NORMAL_MODE;
+                            }
+                        }
+
 
                         listAdapter.notifyDataSetChanged();
+                        listAdapter2.notifyDataSetChanged();
 
                     }
 
@@ -260,8 +286,8 @@ public class MainActivity extends AppCompatActivity
                             }
                         } else if (currentMode1 == SELECT_MODE && position != 0 && !InMainDirectory2)
                             {
-                                if(!selected1.contains(strings1.get(position).getName())) selected1.add(strings1.get(position).getName());
-                                else selected1.remove(strings1.get(position).getName());
+                                if(!selected1.contains(strings1.get(position))) selected1.add(strings1.get(position));
+                                else selected1.remove(strings1.get(position));
                                 if(selected1.size()==0) currentMode1 = NORMAL_MODE;
                                 Log.d("EPTAhui",  "----" + strings1.get(position).getName());
                                 Log.d("EPTAhui", "----" + selected1);
@@ -272,22 +298,32 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     @Override
-                    public void onItemLongClick(View view, int position)
+                    public void onItemLongClick(View view, final int position)
                     {
                         lastRecyclerAction=2;
                         Log.d("EPTAhui", "longlonglongclick------------------");
-                        Toast.makeText(getApplicationContext(),strings1.get(position).getName(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),strings1.get(position).getName(), Toast.LENGTH_SHORT).show();
                         if(currentMode1 == NORMAL_MODE && position != 0 && !InMainDirectory2)
                         {
                             currentMode1 = SELECT_MODE;
-                            selected1.add(strings1.get(position).getName());
+                            selected1.add(strings1.get(position));
                         }
                         else if (currentMode1 == SELECT_MODE)
                         {
                             currentMode1 = NORMAL_MODE;
                             while(selected1.size() > 0) selected1.remove(0);
                         }
+                        else if(currentMode == COPY_MODE || currentMode1 == COPY_MODE)
+                        {
+                            CopyDialog(strings1.get(position));
+                            if(selectedForCopy.size()==0 && selectedForCopy1.size()==0)
+                            {
+                                currentMode = NORMAL_MODE;
+                                currentMode1 = NORMAL_MODE;
+                            }
+                        }
 
+                        listAdapter.notifyDataSetChanged();
                         listAdapter2.notifyDataSetChanged();
                     }
                 })
@@ -329,22 +365,63 @@ public class MainActivity extends AppCompatActivity
         switch (id)
         {
             case R.id.action_uncheck :
-                {
-                    if(currentMode != NORMAL_MODE) while (selected.size()!=0) selected.remove(0);
-                    if(currentMode1 != NORMAL_MODE) while (selected1.size()!=0) selected1.remove(0);
-                    currentMode = NORMAL_MODE;
-                    currentMode1 = NORMAL_MODE;
-                    listAdapter.notifyDataSetChanged();
-                    listAdapter2.notifyDataSetChanged();
-                }
+                if(currentMode != NORMAL_MODE) while (selected.size()!=0) selected.remove(0);
+                if(currentMode1 != NORMAL_MODE) while (selected1.size()!=0) selected1.remove(0);
+                currentMode = NORMAL_MODE;
+                currentMode1 = NORMAL_MODE;
+                break;
             case R.id.action_copy :
-                {
-
-                }
-
+                currentMode = COPY_MODE;
+                currentMode1 = COPY_MODE;
+                for (int i = 0; i < selected.size(); i++) selectedForCopy.add(selected.get(i));
+                for (int i = 0; i < selected1.size(); i++) selectedForCopy1.add(selected1.get(i));
+                while (selected.size()!=0) selected.remove(0);
+                while (selected1.size()!=0) selected1.remove(0);
+                for (int i = 0; i < selectedForCopy.size(); i++) Log.d("EPTA---", selectedForCopy.get(i).getName());
+                for (int i = 0; i < selectedForCopy1.size(); i++) Log.d("EPTA---", selectedForCopy1.get(i).getName());
+                Toast.makeText(getApplicationContext(),"CopyMode",Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.dest_Rec1 :
+                if(currentMode == COPY_MODE)
+                    while (selectedForCopy.size() != 0)
+                    {
+                        intellectCopy(selectedForCopy.get(0).getFile().getAbsolutePath(), currentDir.getAbsolutePath() + "/" + selectedForCopy.get(0).getName());
+                        selectedForCopy.remove(0);
+                    }
+                if(currentMode1 == COPY_MODE)
+                    while (selectedForCopy1.size() != 0)
+                    {
+                        intellectCopy(selectedForCopy1.get(0).getFile().getAbsolutePath(),currentDir.getAbsolutePath() + "/" + selectedForCopy1.get(0).getName());
+                        selectedForCopy1.remove(0);
+                    }
+                currentMode = NORMAL_MODE;
+                currentMode1 = NORMAL_MODE;
+                break;
+            case R.id.dest_Rec2 :
+                if(currentMode == COPY_MODE)
+                    while (selectedForCopy.size() != 0)
+                    {
+                        intellectCopy(selectedForCopy.get(0).getFile().getAbsolutePath(), currentDir1.getAbsolutePath() + "/" + selectedForCopy.get(0).getName());
+                        selectedForCopy.remove(0);
+                    }
+                if(currentMode1 == COPY_MODE)
+                    while (selectedForCopy1.size() != 0)
+                    {
+                        intellectCopy(selectedForCopy1.get(0).getFile().getAbsolutePath(), currentDir1.getAbsolutePath() + "/" + selectedForCopy1.get(0).getName());
+                        selectedForCopy1.remove(0);
+                    }
+                currentMode = NORMAL_MODE;
+                currentMode1 = NORMAL_MODE;
+                break;
             default:
+                listAdapter.notifyDataSetChanged();
+                listAdapter2.notifyDataSetChanged();
                 return super.onOptionsItemSelected(item);
+
         }
+        listAdapter.notifyDataSetChanged();
+        listAdapter2.notifyDataSetChanged();
+        return super.onOptionsItemSelected(item);
     }
 
 
@@ -471,6 +548,130 @@ public class MainActivity extends AppCompatActivity
         return result;
     }
 
+    public void copyFile(File sourceFile, File destFile)
+    {
+        try
+        {
+            FileInputStream inStream = new FileInputStream(sourceFile);
+            FileOutputStream outStream = new FileOutputStream(destFile);
+            FileChannel inChannel = inStream.getChannel();
+            FileChannel outChannel = outStream.getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+            inStream.close();
+            outStream.close();
+        }
+        catch (IOException e)
+        {
+            Toast.makeText(getApplicationContext(),"Something wrong", Toast.LENGTH_SHORT).show();
+            Log.e("EPTAerr", e.getLocalizedMessage());
+            Log.e("EPTAerr", sourceFile.getAbsolutePath());
+            Log.e("EPTAerr", sourceFile.getName());
+            Log.e("EPTAerr", destFile.getAbsolutePath());
+            Log.e("EPTAerr", destFile.getName());
 
+
+        }
+
+    }
+
+    //with dirs
+    public void intellectCopy(String sourceDir, String destDir)
+    {
+        try {
+            File src = new File(sourceDir);
+            File dst = new File(destDir, src.getName());
+
+            if (src.isDirectory()) {
+
+                String files[] = src.list();
+                int filesLength = files.length;
+                for (int i = 0; i < filesLength; i++) {
+                    String src1 = (new File(src, files[i]).getPath());
+                    String dst1 = dst.getPath();
+                    intellectCopy(src1, dst1);
+
+                }
+            } else {
+                copyFile(src, dst);
+            }
+        } catch (Exception e)
+        {
+
+        }
+    }
+
+    public void CopyDialog (final FileObject object)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Copying")
+                .setMessage("Copy to " + object.getFile().getAbsolutePath())
+                .setIcon(R.mipmap.copy_icon)
+                .setCancelable(false)
+                .setPositiveButton("Copy here", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        String destination = "";
+                        if(object.getFile().isFile()) destination = object.getFile().getParentFile().getAbsolutePath() + "/";
+
+                        if(object.getFile().isDirectory()) destination = object.getFile().getAbsolutePath() + "/";
+
+                        /*while(selectedForCopy.size() != 0)
+                        {
+                            intellectCopy(selectedForCopy.get(0).getFile().getAbsolutePath(), destination);
+                            //copyFile(selectedForCopy.get(0).getFile(), new File(destination + selectedForCopy.get(0).getName()));
+                            Log.d("EPTAcopy", "try1 :  " + destination);
+                            selectedForCopy.remove(0);
+                        }
+                        while (selectedForCopy1.size() != 0)
+                        {
+                            intellectCopy(selectedForCopy1.get(0).getFile().getAbsolutePath(), destination);
+                            //copyFile(selectedForCopy1.get(0).getFile(), new File(destination + selectedForCopy1.get(0).getName()));
+                            Log.d("EPTAcopy", "try2 :  " + destination);
+                            selectedForCopy1.remove(0);
+                        }*/
+                        try
+                        {
+                            copyEZ(selectedForCopy,new File(destination));
+                            copyEZ(selectedForCopy1,new File(destination));
+                            while(selectedForCopy.size() != 0) selectedForCopy.remove(0);
+                            while(selectedForCopy1.size() != 0) selectedForCopy1.remove(0);
+                        }
+                        catch (IOException e)
+                        {
+
+                        }
+
+
+
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        listAdapter.notifyDataSetChanged();
+        listAdapter2.notifyDataSetChanged();
+    }
+
+    public void copyEZ(List<FileObject> sourceFiles, File destFile) throws IOException
+    {
+        File destinationDir = destFile;
+        if(destFile.isFile()) destinationDir = destFile.getParentFile();
+        if(destFile.isDirectory()) destinationDir = destFile;
+
+        for(int i = 0; i < sourceFiles.size(); i++)
+        {
+            if(sourceFiles.get(i).getFile().isDirectory())
+                FileUtils.copyDirectoryToDirectory(sourceFiles.get(i).getFile(), destinationDir);
+            if(sourceFiles.get(i).getFile().isFile())
+                FileUtils.copyFileToDirectory(sourceFiles.get(i).getFile(), destinationDir);
+        }
+    }
 
 }

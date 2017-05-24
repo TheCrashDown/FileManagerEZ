@@ -18,12 +18,12 @@ import java.util.List;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> {
 
-    Context context;
-    List<FileObject> arrayList;
-    File currentdir;
-    List<String> selected;
+    private Context context;
+    private List<FileObject> arrayList;
+    private File currentdir;
+    private List<FileObject> selected;
 
-    public ListAdapter(Context context, List<FileObject> arrayList, File currentDir, List<String> selected)
+    public ListAdapter(Context context, List<FileObject> arrayList, File currentDir, List<FileObject> selected)
     {
         this.context = context;
         this.arrayList = arrayList;
@@ -45,7 +45,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
 
         String string = arrayList.get(position).getName();
         int color = Color.WHITE;
-        if(position!=0 && selected.contains(arrayList.get(position).getName()))
+        if(position!=0 && selected.contains(arrayList.get(position)))
         {
             color = Color.parseColor("#bed2dc");
             holder.checkbox.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.item_checked));
@@ -58,7 +58,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
 
         holder.itemView.setBackgroundColor(color);
 
-        if (selected.contains(arrayList.get(position).getName()))
+        if (selected.contains(arrayList.get(position)))
             Log.d("EPTAhui2.2","true");
         else Log.d("EPTAhui2.2","false");
 
