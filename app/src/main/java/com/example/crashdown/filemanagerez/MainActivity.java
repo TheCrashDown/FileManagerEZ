@@ -276,12 +276,22 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                 }
                                 InMainDirectory2 = false;
                                 listAdapter2.notifyDataSetChanged();
-                            } else {
+                            } else if(strings1.get(position).getFile().isDirectory()){
                                 MoverArgument result = MoveToChild(strings1, currentDir1, position);
                                 strings1 = result.getStrings();
                                 currentDir1 = result.getCurrentDir();
                                 listAdapter2.notifyDataSetChanged();
                             }
+                            else if(strings1.get(position).getFile().isFile())
+                            {
+                                try
+                                {
+                                    openFileInDefault(strings1.get(position).getFile());
+                                }
+                                catch (IOException e){}
+                            }
+
+
                         } else if (currentMode1 == SELECT_MODE && position != 0 && !InMainDirectory2) {
                             if (!selected1.contains(strings1.get(position)))
                                 selected1.add(strings1.get(position));
