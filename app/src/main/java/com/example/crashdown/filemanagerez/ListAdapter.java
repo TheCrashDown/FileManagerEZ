@@ -62,8 +62,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
             Log.d("EPTAhui2.2","true");
         else Log.d("EPTAhui2.2","false");
 
+
         holder.textView.setText(string);
 
+        if(position==0) holder.sizeFile.setText("");
+        else if(arrayList.get(position).getFile().isFile()) holder.sizeFile.setText(getStringFileSize(arrayList.get(position).getFile()));
+        else holder.sizeFile.setText("folder ");
 
 
 
@@ -76,13 +80,36 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         {
             holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.ic_launcher));
         }
-        else if (arrayList.get(position).getFile() != null && arrayList.get(position).getFile().isDirectory())
+        else if (arrayList.get(position).getFile() != null)
         {
-            holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.folder_image));
+            File file = arrayList.get(position).getFile();
+            if(file.isDirectory())
+                holder.imageView.setImageDrawable(ContextCompat.getDrawable(context,R.mipmap.folder_image));
+            else if(file.getName().endsWith(".jpg") ||
+                    file.getName().endsWith(".png") ||
+                    file.getName().endsWith(".jpeg") ||
+                    file.getName().endsWith(".bmp") ||
+                    file.getName().endsWith(".tiff")) holder.imageView.setImageDrawable(ContextCompat.getDrawable(context,R.mipmap.filetype_image));
+            else if(file.getName().endsWith(".mkv") ||
+                    file.getName().endsWith(".flv") ||
+                    file.getName().endsWith(".mp4") ||
+                    file.getName().endsWith(".vob") ||
+                    file.getName().endsWith(".avi") ||
+                    file.getName().endsWith(".wmv")) holder.imageView.setImageDrawable(ContextCompat.getDrawable(context,R.mipmap.filetype_video));
+            else if(file.getName().endsWith(".mp3") ||
+                    file.getName().endsWith(".flac") ||
+                    file.getName().endsWith(".wma") ||
+                    file.getName().endsWith(".aac") ||
+                    file.getName().endsWith(".wav")||
+                    file.getName().endsWith(".ogg")) holder.imageView.setImageDrawable(ContextCompat.getDrawable(context,R.mipmap.filetype_music));
+            else if(file.getName().endsWith(".txt") ||
+                    file.getName().endsWith(".xml") ||
+                    file.getName().endsWith(".html") ||
+                    file.getName().endsWith(".cs") ||
+                    file.getName().endsWith(".java") ||
+                    file.getName().endsWith(".csv")) holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.filetype_text));
+            else holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.filetype_void));
         }
-        else holder.imageView.setImageDrawable(ContextCompat.getDrawable(context, R.mipmap.document_image));
-
-
 
     }
 
@@ -91,23 +118,30 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         return arrayList.size();
     }
 
+    private String getStringFileSize(File file)
+    {
+        long size = file.length();
+        if(size < 1024) return Long.toString(size) + " B ";
+        if(size < 1024*1024) return Long.toString(size/1024) + " Kb ";
+        if(size < 1024*1024*1024) return Long.toString(size/1024/1024) + " Mb ";
+        else return Long.toString(size/1024/1024/1024) + " Gb ";
+    }
+
 
     public class MyViewHolder extends RecyclerView.ViewHolder
     {
         ImageView checkbox;
         ImageView imageView;
         TextView textView;
-        LinearLayout linearLayout;
-
+        TextView sizeFile;
 
 
         public MyViewHolder(View itemview) {
             super(itemview);
-
-            linearLayout = (LinearLayout) itemview.findViewById(R.id.list_item1);
             checkbox = (ImageView) itemview.findViewById(R.id.list_item1_checkbox);
             imageView = (ImageView) itemview.findViewById(R.id.list_item1_image);
             textView = (TextView) itemview.findViewById(R.id.list_item1_textView);
+            sizeFile = (TextView) itemview.findViewById(R.id.list_item1_textFileSize);
 
 
         }

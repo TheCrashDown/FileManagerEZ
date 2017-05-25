@@ -56,30 +56,5 @@
     </group>
 
 
-    <group
-        android:id="@+id/gropu_mode_copy">
-
-        <item
-            android:id="@+id/dest_Rec1"
-            android:icon="@mipmap/copy_icon"
-            android:title="@string/dest_Rec1"
-            android:orderInCategory="400"
-            app:showAsAction="ifRoom" />
-
-        <item
-            android:id="@+id/dest_Rec1.5"
-            android:title="----"
-            android:orderInCategory="500"
-            app:showAsAction="ifRoom" />
-
-
-        <item
-            android:id="@+id/dest_Rec2"
-            android:icon="@mipmap/copy_icon"
-            android:title="@string/dest_Rec2"
-            android:orderInCategory="600"
-            app:showAsAction="ifRoom" />
-    </group>
-
 
 </menu>
