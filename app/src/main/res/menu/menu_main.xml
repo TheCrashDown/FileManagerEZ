@@ -26,33 +26,25 @@
             android:orderInCategory="400"
             android:title="@string/action_delete"
             app:showAsAction="never"/>
-        <item
-            android:id="@+id/action_properties"
-            android:orderInCategory="500"
-            android:title="@string/action_properties"
-            app:showAsAction="never"/>
+
     </group>
 
     <group
         android:id="@+id/group_mode_normal">
 
         <item
-            android:id="@+id/action_createFolder"
+            android:id="@+id/action_sortByName"
             android:orderInCategory="400"
-            android:title="@string/action_createFolder"
+            android:title="@string/action_sortByName"
             app:showAsAction="never"/>
 
         <item
-            android:id="@+id/action_settings"
+            android:id="@+id/action_sortBySize"
             android:orderInCategory="500"
-            android:title="@string/action_settings"
+            android:title="@string/action_sortBySize"
             app:showAsAction="never"/>
 
-        <item
-            android:id="@+id/action_about"
-            android:orderInCategory="600"
-            android:title="@string/action_about"
-            app:showAsAction="never"/>
+
     </group>
 
 

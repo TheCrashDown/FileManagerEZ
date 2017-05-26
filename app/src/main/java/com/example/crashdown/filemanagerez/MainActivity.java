@@ -15,12 +15,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -35,6 +37,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     public static final FileObject STORAGE_LOCATION = new FileObject(Environment.getExternalStorageDirectory(), "Storage");
     public static final FileObject SDCARD_LOCATION = new FileObject(new File(System.getenv("SECONDARY_STORAGE")), "SD-Card");
     public static final String TURN_BACK_BUTTON = "../turn_back/..";
+
+    private static final int SORT_BY_NAME = 0;
+    private static final int SORT_BY_SIZE = 1;
+
+    private int sortType;
 
     private File currentDir;
     private File currentDir1;
@@ -71,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     final ListAdapter listAdapter2 = new ListAdapter(this, strings1, currentDir1, selected1);
 
     private SeekBar copySwapper;
+    private boolean copySwapperVisible = true;
 
 
     @Override
@@ -81,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         setTitle("FileManagerEz");
         copySwapper = (SeekBar) findViewById(R.id.copySwapper);
         copySwapper.setOnSeekBarChangeListener(this);
+        sortType = SORT_BY_NAME;
 
 
         currentDir = STORAGE_LOCATION.getFile();
@@ -93,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 strings.add(new FileObject(files[i]));
             }
         }
+        sortListsBy(sortType);
 
 
         currentDir1 = SDCARD_LOCATION.getFile();
@@ -130,7 +140,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
-                    public void onItemClick(View view, int position) {
+                    public void onItemClick(View view, int position)
+                    {
                         Log.d("EPTAhui", "click------------------");
                         if (currentMode != SELECT_MODE)
                         {
@@ -211,6 +222,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             Log.d("EPTAhui", "----" + selected);
                             listAdapter.notifyDataSetChanged();
                         }
+                        sortListsBy(sortType);
+                        listAdapter.notifyDataSetChanged();
+                        listAdapter2.notifyDataSetChanged();
                     }
 
                     @Override
@@ -261,7 +275,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
 
                     @Override
-                    public void onItemClick(View view, int position) {
+                    public void onItemClick(View view, int position)
+                    {
                         if (currentMode1 != SELECT_MODE) {
                             lastRecyclerAction = 2;
                             if (strings1.get(position).getName().equals(TURN_BACK_BUTTON)) {
@@ -339,6 +354,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             listAdapter2.notifyDataSetChanged();
 
                         }
+                        sortListsBy(sortType);
+                        listAdapter.notifyDataSetChanged();
+                        listAdapter2.notifyDataSetChanged();
 
 
                     }
@@ -400,6 +418,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             menu.setGroupVisible(R.id.group_mode_normal, true);
             menu.setGroupVisible(R.id.group_mode_select, false);
         }
+
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -433,6 +453,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 for (int i = 0; i < selectedForCopy1.size(); i++)
                     Log.d("EPTA---", selectedForCopy1.get(i).getName());
                 //Toast.makeText(getApplicationContext(), "CopyMode", Toast.LENGTH_SHORT).show();
+                sortListsBy(sortType);
+                listAdapter.notifyDataSetChanged();
+                listAdapter2.notifyDataSetChanged();
                 break;
             case R.id.action_delete:
                 DeleteDialog();
@@ -446,7 +469,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                         Thread.sleep(200);
                     }
                     catch (InterruptedException e){}
-                    notifyAllChanges();
+                    //notifyAllChanges();
+                    sortListsBy(sortType);
+                    listAdapter.notifyDataSetChanged();
+                    listAdapter2.notifyDataSetChanged();
                 }
                 break;
             case R.id.action_moveto:
@@ -463,7 +489,25 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 for (int i = 0; i < selectedForCopy1.size(); i++)
                     Log.d("EPTA---", selectedForCopy1.get(i).getName());
                 //Toast.makeText(getApplicationContext(), "CopyMode", Toast.LENGTH_SHORT).show();
+                //notifyAllChanges();
+                sortListsBy(sortType);
+                listAdapter.notifyDataSetChanged();
+                listAdapter2.notifyDataSetChanged();
                 break;
+            case R.id.action_sortByName:
+                sortType = SORT_BY_NAME;
+                sortListsBy(sortType);
+                listAdapter.notifyDataSetChanged();
+                listAdapter2.notifyDataSetChanged();
+                break;
+            case R.id.action_sortBySize:
+                sortType = SORT_BY_SIZE;
+                sortListsBy(sortType);
+                listAdapter.notifyDataSetChanged();
+                listAdapter2.notifyDataSetChanged();
+                break;
+
+
 
 
             default:
@@ -564,6 +608,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         }
         setTitle("FileManagerEZ");
         copySwapper.setVisibility(View.GONE);
+        sortListsBy(sortType);
+        listAdapter.notifyDataSetChanged();
+        listAdapter2.notifyDataSetChanged();
 
     }
 
@@ -916,6 +963,23 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         }
         listAdapter2.notifyDataSetChanged();
         listAdapter.notifyDataSetChanged();
+    }
+
+    public void sortListsBy(int sortType)
+    {
+        switch (sortType)
+        {
+            case SORT_BY_NAME:
+                if(!InMainDirectory)Collections.sort(strings,FileObject.COMPARE_BY_NAME);
+                if(!InMainDirectory2)Collections.sort(strings1,FileObject.COMPARE_BY_NAME);
+                break;
+            case SORT_BY_SIZE:
+                if(!InMainDirectory)Collections.sort(strings,FileObject.COMPARE_BY_SIZE);
+                if(!InMainDirectory2)Collections.sort(strings1,FileObject.COMPARE_BY_SIZE);
+                break;
+            default:
+                break;
+        }
     }
 }
 
