@@ -1,5 +1,6 @@
 package com.example.crashdown.filemanagerez;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,7 +15,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     private static long lastCloseClicked = 0;
 
+    private List<Integer> scrollHistory = new ArrayList<>();
+    private List<Integer> scrollHistory1 = new ArrayList<>();
 
     private String destinationCopy = "";
 
@@ -103,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             }
         }
 
+        scrollHistory.add(0);
+        scrollHistory1.add(0);
+
 
         recyclerView = (RecyclerView) findViewById(R.id.list1);
 
@@ -133,17 +138,22 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                 MoverArgument result = MoveToParent(strings, currentDir);
                                 strings = result.getStrings();
                                 currentDir = result.getCurrentDir();
+                                recyclerView.scrollToPosition(scrollHistory.get(scrollHistory.size()-1));
+                                scrollHistory.remove(scrollHistory.size()-1);
                                 listAdapter.notifyDataSetChanged();
                             } else if ((strings.get(position).getFile().getAbsolutePath().equals(STORAGE_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory) ||
                                     (strings.get(position).getFile().getAbsolutePath().equals(SDCARD_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory)) {
                                 for (int i = 0; i < strings.size(); ) strings.remove(0);
                                 strings.add(STORAGE_LOCATION);
                                 strings.add(SDCARD_LOCATION);
+                                recyclerView.scrollToPosition(scrollHistory.get(scrollHistory.size()-1));
+                                scrollHistory.remove(scrollHistory.size()-1);
                                 InMainDirectory = true;
                                 listAdapter.notifyDataSetChanged();
                             } else if (InMainDirectory)
                             {
                                 if (position == 0) {
+                                    scrollHistory.add(position);
                                     currentDir = STORAGE_LOCATION.getFile();
                                     for (int i = 0; i < strings.size(); ) strings.remove(0);
                                     strings.add(STORAGE_LOCATION);
@@ -155,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                     }
                                 }
                                 if (position == 1) {
+                                    scrollHistory.add(position);
                                     currentDir = SDCARD_LOCATION.getFile();
                                     for (int i = 0; i < strings.size(); ) strings.remove(0);
                                     strings.add(SDCARD_LOCATION);
@@ -168,9 +179,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                 InMainDirectory = false;
                                 listAdapter.notifyDataSetChanged();
                             } else if(strings.get(position).getFile().isDirectory()) {
+                                scrollHistory.add(position);
                                 MoverArgument result = MoveToChild(strings, currentDir, position);
                                 strings = result.getStrings();
                                 currentDir = result.getCurrentDir();
+                                recyclerView.scrollToPosition(0);
                                 listAdapter.notifyDataSetChanged();
                             }
                             //new
@@ -243,6 +256,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                 MoverArgument result = MoveToParent(strings1, currentDir1);
                                 strings1 = result.getStrings();
                                 currentDir1 = result.getCurrentDir();
+                                recyclerView2.scrollToPosition(scrollHistory1.get(scrollHistory1.size()-1));
+                                scrollHistory1.remove(scrollHistory1.get(scrollHistory1.size()-1));
                                 listAdapter2.notifyDataSetChanged();
                             } else if ((strings1.get(position).getFile().getAbsolutePath().equals(STORAGE_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory2) ||
                                     (strings1.get(position).getFile().getAbsolutePath().equals(SDCARD_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory2)) {
@@ -250,9 +265,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                 strings1.add(STORAGE_LOCATION);
                                 strings1.add(SDCARD_LOCATION);
                                 InMainDirectory2 = true;
+                                recyclerView2.scrollToPosition(scrollHistory1.get(scrollHistory1.size()-1));
+                                scrollHistory1.remove(scrollHistory1.get(scrollHistory1.size()-1));
                                 listAdapter2.notifyDataSetChanged();
                             } else if (InMainDirectory2) {
                                 if (position == 0) {
+                                    scrollHistory1.add(position);
                                     currentDir1 = STORAGE_LOCATION.getFile();
                                     for (int i = 0; i < strings1.size(); ) strings1.remove(0);
                                     strings1.add(STORAGE_LOCATION);
@@ -264,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                     }
                                 }
                                 if (position == 1) {
+                                    scrollHistory1.add(position);
                                     currentDir1 = SDCARD_LOCATION.getFile();
                                     for (int i = 0; i < strings1.size(); ) strings1.remove(0);
                                     strings1.add(SDCARD_LOCATION);
@@ -277,9 +296,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                 InMainDirectory2 = false;
                                 listAdapter2.notifyDataSetChanged();
                             } else if(strings1.get(position).getFile().isDirectory()){
+                                scrollHistory1.add(position);
                                 MoverArgument result = MoveToChild(strings1, currentDir1, position);
                                 strings1 = result.getStrings();
                                 currentDir1 = result.getCurrentDir();
+                                recyclerView2.scrollToPosition(0);
                                 listAdapter2.notifyDataSetChanged();
                             }
                             else if(strings1.get(position).getFile().isFile())
@@ -304,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             Log.d("EPTAhui", "----" + strings1.get(position).getName());
                             Log.d("EPTAhui", "----" + selected1);
                             listAdapter2.notifyDataSetChanged();
+
                         }
 
 
@@ -454,12 +476,16 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     MoverArgument result = MoveToParent(strings, currentDir);
                     strings = result.getStrings();
                     currentDir = result.getCurrentDir();
+                    recyclerView.scrollToPosition(scrollHistory.get(scrollHistory.size()-1));
+                    scrollHistory.remove(scrollHistory.size()-1);
                     listAdapter.notifyDataSetChanged();
                 } else if ((strings.get(0).getFile().getAbsolutePath().equals(STORAGE_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory) ||
                         (strings.get(0).getFile().getAbsolutePath().equals(SDCARD_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory)) {
                     for (int i = 0; i < strings.size(); ) strings.remove(0);
                     strings.add(STORAGE_LOCATION);
                     strings.add(SDCARD_LOCATION);
+                    recyclerView.scrollToPosition(scrollHistory.get(scrollHistory.size()-1));
+                    scrollHistory.remove(scrollHistory.size()-1);
                     InMainDirectory = true;
                     listAdapter.notifyDataSetChanged();
                 }
@@ -469,12 +495,16 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     lastRecyclerAction = 2;
                     strings1 = result.getStrings();
                     currentDir1 = result.getCurrentDir();
+                    recyclerView2.scrollToPosition(scrollHistory1.get(scrollHistory1.size()-1));
+                    scrollHistory1.remove(scrollHistory1.size()-1);
                     listAdapter2.notifyDataSetChanged();
                 } else if ((strings1.get(0).getFile().getAbsolutePath().equals(STORAGE_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory2) ||
                         (strings1.get(0).getFile().getAbsolutePath().equals(SDCARD_LOCATION.getFile().getAbsolutePath()) && !InMainDirectory2)) {
                     for (int i = 0; i < strings1.size(); ) strings1.remove(0);
                     strings1.add(STORAGE_LOCATION);
                     strings1.add(SDCARD_LOCATION);
+                    recyclerView2.scrollToPosition(scrollHistory1.get(scrollHistory1.size()-1));
+                    scrollHistory1.remove(scrollHistory1.size()-1);
                     InMainDirectory2 = true;
                     listAdapter2.notifyDataSetChanged();
                 }
@@ -495,7 +525,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         copySwapper.setVisibility(View.GONE);
 
     }
-
 
     public MoverArgument MoveToParent(List<FileObject> strings, File currentDir) {
         File[] files;
@@ -638,49 +667,55 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     public void openFileInDefault(File url) throws IOException
     {
-        File file=url;
-        Uri uri = Uri.fromFile(file);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        if (url.toString().contains(".doc") || url.toString().contains(".docx")) {
-            // Word document
-            intent.setDataAndType(uri, "application/msword");
-        } else if(url.toString().contains(".pdf")) {
-            // PDF file
-            intent.setDataAndType(uri, "application/pdf");
-        } else if(url.toString().contains(".ppt") || url.toString().contains(".pptx")) {
-            // Powerpoint file
-            intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
-        } else if(url.toString().contains(".xls") || url.toString().contains(".xlsx")) {
-            // Excel file
-            intent.setDataAndType(uri, "application/vnd.ms-excel");
-        } else if(url.toString().contains(".zip") || url.toString().contains(".rar")) {
-            // WAV audio file
-            intent.setDataAndType(uri, "application/x-wav");
-        } else if(url.toString().contains(".rtf")) {
-            // RTF file
-            intent.setDataAndType(uri, "application/rtf");
-        } else if(url.toString().contains(".wav") || url.toString().contains(".mp3")) {
-            // WAV audio file
-            intent.setDataAndType(uri, "audio/x-wav");
-        } else if(url.toString().contains(".gif")) {
-            // GIF file
-            intent.setDataAndType(uri, "image/gif");
-        } else if(url.toString().contains(".jpg") || url.toString().contains(".jpeg") || url.toString().contains(".png")) {
-            // JPG file
-            intent.setDataAndType(uri, "image/jpeg");
-        } else if(url.toString().contains(".txt")) {
-            // Text file
-            intent.setDataAndType(uri, "text/plain");
-        } else if(url.toString().contains(".3gp") || url.toString().contains(".mpg") || url.toString().contains(".mpeg") || url.toString().contains(".mpe") || url.toString().contains(".mp4") || url.toString().contains(".avi")) {
-            // Video files
-            intent.setDataAndType(uri, "video/*");
-        } else {
+        try {
+            File file = url;
+            Uri uri = Uri.fromFile(file);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            if (url.toString().contains(".doc") || url.toString().contains(".docx")) {
+                // Word document
+                intent.setDataAndType(uri, "application/msword");
+            } else if (url.toString().contains(".pdf")) {
+                // PDF file
+                intent.setDataAndType(uri, "application/pdf");
+            } else if (url.toString().contains(".ppt") || url.toString().contains(".pptx")) {
+                // Powerpoint file
+                intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
+            } else if (url.toString().contains(".xls") || url.toString().contains(".xlsx")) {
+                // Excel file
+                intent.setDataAndType(uri, "application/vnd.ms-excel");
+            } else if (url.toString().contains(".zip") || url.toString().contains(".rar")) {
+                // WAV audio file
+                intent.setDataAndType(uri, "application/x-wav");
+            } else if (url.toString().contains(".rtf")) {
+                // RTF file
+                intent.setDataAndType(uri, "application/rtf");
+            } else if (url.toString().contains(".wav") || url.toString().contains(".mp3")) {
+                // WAV audio file
+                intent.setDataAndType(uri, "audio/x-wav");
+            } else if (url.toString().contains(".gif")) {
+                // GIF file
+                intent.setDataAndType(uri, "image/gif");
+            } else if (url.toString().contains(".jpg") || url.toString().contains(".jpeg") || url.toString().contains(".png")) {
+                // JPG file
+                intent.setDataAndType(uri, "image/jpeg");
+            } else if (url.toString().contains(".txt")) {
+                // Text file
+                intent.setDataAndType(uri, "text/plain");
+            } else if (url.toString().contains(".3gp") || url.toString().contains(".mpg") || url.toString().contains(".mpeg") || url.toString().contains(".mpe") || url.toString().contains(".mp4") || url.toString().contains(".avi")) {
+                // Video files
+                intent.setDataAndType(uri, "video/*");
+            } else {
 
-            intent.setDataAndType(uri, "*/*");
+                intent.setDataAndType(uri, "*/*");
+            }
+
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
-
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        catch (ActivityNotFoundException e)
+        {
+            Toast.makeText(getApplicationContext(), "Default app not found", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
