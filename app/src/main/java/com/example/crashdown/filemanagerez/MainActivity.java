@@ -1,7 +1,6 @@
 package com.example.crashdown.filemanagerez;
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -43,8 +42,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private File[] files;
     private File[] files1;
 
-    private List<FileObject> strings = new ArrayList<FileObject>();
-    private List<FileObject> strings1 = new ArrayList<FileObject>();
+    private List<FileObject> strings = new ArrayList<>();
+    private List<FileObject> strings1 = new ArrayList<>();
 
     private boolean InMainDirectory = false;
     private boolean InMainDirectory2 = false;
@@ -52,8 +51,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private static int currentMode = 0;
     private static int currentMode1 = 0;
 
-    private List<FileObject> selected = new ArrayList<FileObject>();
-    private List<FileObject> selected1 = new ArrayList<FileObject>();
+    private List<FileObject> selected = new ArrayList<>();
+    private List<FileObject> selected1 = new ArrayList<>();
     private List<FileObject> selectedForCopy = new ArrayList<>();
     private List<FileObject> selectedForCopy1 = new ArrayList<>();
 
@@ -75,7 +74,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("FileManagerEz");
@@ -132,9 +132,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     @Override
                     public void onItemClick(View view, int position) {
                         Log.d("EPTAhui", "click------------------");
-                        if (currentMode == NORMAL_MODE) {
+                        if (currentMode != SELECT_MODE)
+                        {
                             lastRecyclerAction = 1;
-                            if (strings.get(position).getName() == TURN_BACK_BUTTON) {
+                            if (strings.get(position).getName().equals(TURN_BACK_BUTTON)) {
                                 MoverArgument result = MoveToParent(strings, currentDir);
                                 strings = result.getStrings();
                                 currentDir = result.getCurrentDir();
@@ -225,9 +226,20 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             currentMode = NORMAL_MODE;
                             setTitle("FileManagerEZ");
                             while (selected.size() > 0) selected.remove(0);
-                        } else if (currentMode == COPY_MODE || currentMode1 == COPY_MODE) {
+                        } else if (currentMode == COPY_MODE || currentMode1 == COPY_MODE)
+                        {
                             CopyDialog(strings.get(position));
-                            if (selectedForCopy.size() == 0 && selectedForCopy1.size() == 0) {
+                            if (selectedForCopy.size() == 0 && selectedForCopy1.size() == 0)
+                            {
+                                currentMode = NORMAL_MODE;
+                                currentMode1 = NORMAL_MODE;
+                                setTitle("FileManagerEZ");
+                            }
+                        } else if (currentMode == MOVETO_MODE || currentMode1 == MOVETO_MODE)
+                        {
+                            MovetoDialog(strings.get(position));
+                            if (selectedForCopy.size() == 0 && selectedForCopy1.size() == 0)
+                            {
                                 currentMode = NORMAL_MODE;
                                 currentMode1 = NORMAL_MODE;
                                 setTitle("FileManagerEZ");
@@ -250,9 +262,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
                     @Override
                     public void onItemClick(View view, int position) {
-                        if (currentMode1 == NORMAL_MODE) {
+                        if (currentMode1 != SELECT_MODE) {
                             lastRecyclerAction = 2;
-                            if (strings1.get(position).getName() == TURN_BACK_BUTTON) {
+                            if (strings1.get(position).getName().equals(TURN_BACK_BUTTON)) {
                                 MoverArgument result = MoveToParent(strings1, currentDir1);
                                 strings1 = result.getStrings();
                                 currentDir1 = result.getCurrentDir();
@@ -344,8 +356,17 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             currentMode1 = NORMAL_MODE;
                             setTitle("FileManagerEZ");
                             while (selected1.size() > 0) selected1.remove(0);
-                        } else if (currentMode == COPY_MODE || currentMode1 == COPY_MODE) {
+                        } else if (currentMode == COPY_MODE || currentMode1 == COPY_MODE)
+                        {
                             CopyDialog(strings1.get(position));
+                            if (selectedForCopy.size() == 0 && selectedForCopy1.size() == 0) {
+                                currentMode = NORMAL_MODE;
+                                currentMode1 = NORMAL_MODE;
+                                setTitle("FileManagerEZ");
+                            }
+                        } else if (currentMode == MOVETO_MODE || currentMode1 == MOVETO_MODE)
+                        {
+                            MovetoDialog(strings1.get(position));
                             if (selectedForCopy.size() == 0 && selectedForCopy1.size() == 0) {
                                 currentMode = NORMAL_MODE;
                                 currentMode1 = NORMAL_MODE;
@@ -363,13 +384,15 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
         if (currentMode != NORMAL_MODE || currentMode1 != NORMAL_MODE) {
             menu.setGroupVisible(R.id.group_mode_normal, false);
             menu.setGroupVisible(R.id.group_mode_select, true);
@@ -381,7 +404,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         int id = item.getItemId();
 
         switch (id) {
@@ -411,9 +435,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 //Toast.makeText(getApplicationContext(), "CopyMode", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_delete:
-                List<FileObject> forDeletion = new ArrayList<>();
-                for(int i = 0; i < selected.size(); i++) forDeletion.add(selected.get(i));
-                for(int i = 0; i < selected1.size(); i++) forDeletion.add(selected1.get(i));
                 DeleteDialog();
                 if(selected.size()==0 && selected1.size()==0)
                 {
@@ -428,6 +449,22 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     notifyAllChanges();
                 }
                 break;
+            case R.id.action_moveto:
+                currentMode = MOVETO_MODE;
+                currentMode1 = MOVETO_MODE;
+                copySwapper.setVisibility(View.VISIBLE);
+                setTitle("Chose destination dir");
+                for (int i = 0; i < selected.size(); i++) selectedForCopy.add(selected.get(i));
+                for (int i = 0; i < selected1.size(); i++) selectedForCopy1.add(selected1.get(i));
+                while (selected.size() != 0) selected.remove(0);
+                while (selected1.size() != 0) selected1.remove(0);
+                for (int i = 0; i < selectedForCopy.size(); i++)
+                    Log.d("EPTA---", selectedForCopy.get(i).getName());
+                for (int i = 0; i < selectedForCopy1.size(); i++)
+                    Log.d("EPTA---", selectedForCopy1.get(i).getName());
+                //Toast.makeText(getApplicationContext(), "CopyMode", Toast.LENGTH_SHORT).show();
+                break;
+
 
             default:
                 listAdapter.notifyDataSetChanged();
@@ -457,11 +494,15 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     {
         if(seekBar.getProgress() < 2 && (currentMode1==COPY_MODE || currentMode == COPY_MODE)) CopyDialog(new FileObject(currentDir));
         if(seekBar.getProgress() > 2 && (currentMode1==COPY_MODE || currentMode == COPY_MODE)) CopyDialog(new FileObject(currentDir1));
+
+        if(seekBar.getProgress() < 2 && (currentMode1==MOVETO_MODE || currentMode == MOVETO_MODE)) MovetoDialog(new FileObject(currentDir));
+        if(seekBar.getProgress() > 2 && (currentMode1==MOVETO_MODE || currentMode == MOVETO_MODE)) MovetoDialog(new FileObject(currentDir1));
         seekBar.setProgress(2);
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         if (currentMode == NORMAL_MODE && currentMode1 == NORMAL_MODE) {
             if (lastRecyclerAction == 0 || (lastRecyclerAction == 1 && InMainDirectory) || (lastRecyclerAction == 2 && InMainDirectory2)) {
                 if (System.currentTimeMillis() - lastCloseClicked < 2000) super.onBackPressed();
@@ -526,7 +567,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     }
 
-    public MoverArgument MoveToParent(List<FileObject> strings, File currentDir) {
+    public MoverArgument MoveToParent(List<FileObject> strings, File currentDir)
+    {
         File[] files;
         currentDir = currentDir.getParentFile();
         for (int i = 0; i < strings.size(); ) {
@@ -547,7 +589,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         return result;
     }
 
-    public MoverArgument MoveToChild(List<FileObject> strings, File currentDir, int position) {
+    public MoverArgument MoveToChild(List<FileObject> strings, File currentDir, int position)
+    {
         File[] files;
         currentDir = new File(currentDir.getAbsolutePath() + "/" + strings.get(position).getName());
         if (currentDir.isDirectory()) {
@@ -566,7 +609,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         return result;
     }
 
-    public void CopyDialog(final FileObject object) {
+    public void CopyDialog(final FileObject object)
+    {
 
         if (object.getFile().isFile())
             destinationCopy = object.getFile().getParentFile().getAbsolutePath() + "/";
@@ -665,6 +709,71 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         listAdapter2.notifyDataSetChanged();
     }
 
+    public void MovetoDialog(final FileObject object)
+    {
+        if (object.getFile().isFile())
+            destinationCopy = object.getFile().getParentFile().getAbsolutePath() + "/";
+        if (object.getFile().isDirectory())
+            destinationCopy = object.getFile().getAbsolutePath() + "/";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Moving")
+                .setMessage("Move to \n" + destinationCopy)
+                .setIcon(R.mipmap.copy_icon)
+                .setCancelable(false)
+                .setPositiveButton("Move here", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try
+                        {
+                            copyEZ(selectedForCopy, new File(destinationCopy));
+                            copyEZ(selectedForCopy1, new File(destinationCopy));
+
+
+                            while(selectedForCopy.size()!=0)
+                            {
+                                if(selectedForCopy.get(0).getFile()!=null && selectedForCopy.get(0).getFile().isFile())
+                                    selectedForCopy.get(0).getFile().delete();
+                                if(selectedForCopy.get(0).getFile()!=null && selectedForCopy.get(0).getFile().isDirectory())
+                                    FileUtils.deleteDirectory(selectedForCopy.get(0).getFile());
+                                selectedForCopy.remove(0);
+                            }
+                            while(selectedForCopy1.size()!=0)
+                            {
+                                if(selectedForCopy1.get(0).getFile()!=null && selectedForCopy1.get(0).getFile().isFile())
+                                    selectedForCopy1.get(0).getFile().delete();
+                                if(selectedForCopy1.get(0).getFile()!=null && selectedForCopy1.get(0).getFile().isDirectory())
+                                    FileUtils.deleteDirectory(selectedForCopy1.get(0).getFile());
+                                selectedForCopy1.remove(0);
+                            }
+
+
+                            Thread.sleep(1000);
+                            currentMode = NORMAL_MODE;
+                            currentMode1 = NORMAL_MODE;
+                            setTitle("FileManagerEZ");
+                            notifyAllChanges();
+                        } catch (IOException e) {
+                            Log.e("EPTAerr", "errIOinDialog");
+                            Log.e("EPTAerr", e.getLocalizedMessage());
+                        }catch (InterruptedException e){}
+
+
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        listAdapter.notifyDataSetChanged();
+        listAdapter2.notifyDataSetChanged();
+
+    }
+
     public void openFileInDefault(File url) throws IOException
     {
         try {
@@ -717,7 +826,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             Toast.makeText(getApplicationContext(), "Default app not found", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     public void copyEZ(final List<FileObject> sourceFiles, final File destFile) throws IOException
     {

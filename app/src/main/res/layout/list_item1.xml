@@ -31,7 +31,7 @@
         android:id="@+id/list_item1_textFileSize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="9sp"
+        android:textSize="12sp"
         android:textColor="#848484"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"/>
